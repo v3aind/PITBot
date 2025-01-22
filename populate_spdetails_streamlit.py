@@ -2,11 +2,11 @@ import pandas as pd
 import streamlit as st
 from io import BytesIO
 
-# Function to handle the processing
+# Function to process files
 def process_files(file1, file2):
     # Load the two Excel files into pandas DataFrames
-    df1 = pd.read_excel(file1)
-    df2 = pd.read_excel(file2)
+    df1 = pd.read_excel(file1, engine="openpyxl")
+    df2 = pd.read_excel(file2, engine="openpyxl")
 
     # Create a new DataFrame for the output
     output_df = pd.DataFrame(columns=[
@@ -41,7 +41,7 @@ def process_files(file1, file2):
 
     # Save the output DataFrame to a BytesIO object (for download)
     output_file = BytesIO()
-    output_df.to_excel(output_file, index=False)
+    output_df.to_excel(output_file, index=False, engine="openpyxl")
     output_file.seek(0)
     return output_file
 
@@ -53,19 +53,22 @@ def main():
     file1 = st.file_uploader("Choose the programcode file (programcode.xlsx)", type=["xlsx"])
     file2 = st.file_uploader("Choose the area reference file (arearef.xlsx)", type=["xlsx"])
 
-    if file1 is not None and file2 is not None:
+    if file1 and file2:
         st.write("Processing the files...")
 
-        # Process the files and get the output file
-        output_file = process_files(file1, file2)
+        try:
+            # Process the files and get the output file
+            output_file = process_files(file1, file2)
 
-        # Allow the user to download the output file
-        st.download_button(
-            label="Download Output File",
-            data=output_file,
-            file_name="output.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+            # Allow the user to download the output file
+            st.download_button(
+                label="Download Output File",
+                data=output_file,
+                file_name="output.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     main()
