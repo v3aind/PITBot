@@ -1,6 +1,12 @@
 import pandas as pd
 import streamlit as st
 from io import BytesIO
+import subprocess
+import sys
+
+# Ensure openpyxl is installed
+subprocess.check_call([sys.executable, "-m", "pip", "install", "openpyxl"])
+
 import openpyxl
 
 # Function to handle the processing
