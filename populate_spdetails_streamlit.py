@@ -60,7 +60,7 @@ def process_files(file1, file2, progress_bar):
 def main():
     st.title("Starterpack Area Details DMP Processing")
 
-    st.subheader("Upload the two Excel files")
+    st.subheader("Upload the Programcode and Area Reference Excel files")
     file1 = st.file_uploader("Choose the programcode file (.xls or .xlsx)", type=["xls", "xlsx"])
     file2 = st.file_uploader("Choose the area reference file (.xls or .xlsx)", type=["xls", "xlsx"])
 
