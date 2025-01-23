@@ -2,11 +2,14 @@ import pandas as pd
 import streamlit as st
 from io import BytesIO
 
-# Function to process files
-def process_files(file1, file2):
+# Function to handle the processing
+def process_files(file1, file2, progress_bar):
     # Load the two Excel files into pandas DataFrames
-    df1 = pd.read_excel(file1, engine="openpyxl")
-    df2 = pd.read_excel(file2, engine="openpyxl")
+    progress_bar.progress(10)
+    df1 = pd.read_excel(file1)
+    progress_bar.progress(30)
+    df2 = pd.read_excel(file2)
+    progress_bar.progress(50)
 
     # Create a new DataFrame for the output
     output_df = pd.DataFrame(columns=[
@@ -19,9 +22,10 @@ def process_files(file1, file2):
 
     # Merge the two DataFrames based on AREA_GROUP
     merged_df = pd.merge(df2, df1, on="AREA_GROUP", how="left")
+    progress_bar.progress(70)
 
     # Populate the output DataFrame from the merged DataFrame
-    output_df["AREA"] = merged_df["AREACODE"].astype(str).apply(lambda x: x.zfill(3))  # Ensure leading zeros
+    output_df["AREA"] = merged_df["AREACODE"].apply(lambda x: str(x).zfill(3))
     output_df["PACKAGE_CODE"] = merged_df["PROGRAM_CODE"]
     output_df["AREA_DESCRIPTION"] = merged_df["AREA_DESCRIPTION"]
     output_df["AREA_NEW"] = merged_df["AREA_NEW"]
@@ -34,15 +38,22 @@ def process_files(file1, file2):
     output_df["PROMOTION_PLAN"] = ""
     output_df["PROMOTION_PLAN_STARTDATE"] = ""
     output_df["PROMOTION_PLAN_ENDDATE"] = ""
-    output_df["PRODUCT_SEGMENT_OFFER"] = merged_df["OfferSegment"]
+
+    # Set PRODUCT_SEGMENT_OFFER with exception for SC = 8003
+    output_df["PRODUCT_SEGMENT_OFFER"] = merged_df.apply(
+    lambda row: "911000310" if row["SC"] == 8003 else row["OfferSegment"], axis=1
+    )
+
     output_df["PRODUCT_ID"] = "IM3"
-    output_df["SERVICE_CLASS_LEGACY"] = ""
+    output_df["SERVICE_CLASS_LEGACY"] = merged_df["SC_LEGACY"]
     output_df["FULFILLMENT_MODE"] = "D"
 
     # Save the output DataFrame to a BytesIO object (for download)
+    progress_bar.progress(90)
     output_file = BytesIO()
-    output_df.to_excel(output_file, index=False, engine="openpyxl")
+    output_df.to_excel(output_file, index=False, engine='openpyxl')
     output_file.seek(0)
+    progress_bar.progress(100)
     return output_file
 
 # Streamlit UI
@@ -50,25 +61,28 @@ def main():
     st.title("Starterpack Area Details DMP Processing")
 
     st.subheader("Upload the two Excel files")
-    file1 = st.file_uploader("Choose the programcode file (programcode.xlsx)", type=["xlsx"])
-    file2 = st.file_uploader("Choose the area reference file (arearef.xlsx)", type=["xlsx"])
+    file1 = st.file_uploader("Choose the programcode file (.xls or .xlsx)", type=["xls", "xlsx"])
+    file2 = st.file_uploader("Choose the area reference file (.xls or .xlsx)", type=["xls", "xlsx"])
 
-    if file1 and file2:
+    if file1 is not None and file2 is not None:
         st.write("Processing the files...")
 
-        try:
-            # Process the files and get the output file
-            output_file = process_files(file1, file2)
+        # Initialize progress bar
+        progress_bar = st.progress(0)
 
-            # Allow the user to download the output file
-            st.download_button(
-                label="Download Output File",
-                data=output_file,
-                file_name="output.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
+        # Process the files and get the output file
+        output_file = process_files(file1, file2, progress_bar)
+
+        # Display completion flag
+        st.success("Processing completed!")
+
+        # Allow the user to download the output file
+        st.download_button(
+            label="Download Output File",
+            data=output_file,
+            file_name="output.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
 if __name__ == "__main__":
     main()
