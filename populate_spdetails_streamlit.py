@@ -31,9 +31,9 @@ def process_files(file1, file2, progress_bar):
     output_df["AREA_NEW"] = merged_df["AREA_NEW"]
     output_df["SERVICE_CLASS_NEW"] = merged_df["SC"]
     output_df["BASE_PO"] = merged_df["BASE_PO"]
-    output_df["AREA_OFFER_ID"] = "200000300"
-    output_df["BLOCKING_OFFER_ID"] = "4444"
-    output_df["SIMCARD_TYPE_OFFER"] = "200090010"
+    output_df["AREA_OFFER_ID"] = 200000300
+    output_df["BLOCKING_OFFER_ID"] = 4444
+    output_df["SIMCARD_TYPE_OFFER"] = 200090010
     output_df["PAM_TYPE"] = "DailyPAM"
     output_df["PROMOTION_PLAN"] = ""
     output_df["PROMOTION_PLAN_STARTDATE"] = ""
@@ -41,7 +41,7 @@ def process_files(file1, file2, progress_bar):
 
     # Set PRODUCT_SEGMENT_OFFER with exception for SC = 8003
     output_df["PRODUCT_SEGMENT_OFFER"] = merged_df.apply(
-    lambda row: "911000310" if row["SC"] == 8003 else row["OfferSegment"], axis=1
+    lambda row: 911000310 if row["SC"] == 8003 else row["OfferSegment"], axis=1
     )
 
     output_df["PRODUCT_ID"] = "IM3"
