@@ -1,20 +1,23 @@
-import pandas as pd
-import streamlit as st
-from io import BytesIO
-
 import threading
 import time
+import requests  # Make sure to import requests
 
 def keep_awake():
     while True:
         try:
-            requests.get("https://sp-area-details-dmp.streamlit.app")  # Replace with your app URL
+            response = requests.get("https://sp-area-details-dmp.streamlit.app")
+            print(f"Keep-awake ping sent. Status Code: {response.status_code}")
         except Exception as e:
             print("Keep-awake request failed:", e)
         time.sleep(600)  # Ping every 10 minutes
 
 # Start keep-awake thread
-threading.Thread(target=keep_awake, daemon=True).start()
+thread = threading.Thread(target=keep_awake, daemon=True)
+thread.start()
+
+# Prevent script from exiting (only needed in some cases)
+while True:
+    time.sleep(3600)
 
 # Function to handle the processing
 def process_files(file1, file2, progress_bar):
