@@ -6,7 +6,7 @@ import requests
 import threading
 import time
 
-file_url="https://github.com/v3aind/PITBot/blob/main/arearef.xlsx"
+file_url="https://github.com/v3aind/PITBot/blob/main/programcode.xlsx"
 
 # Fetch the file content
 response = requests.get(file_url)
@@ -14,7 +14,7 @@ file_bytes = response.content
 
 # Streamlit Download Button
 st.download_button(
-    label="Download Reference File",
+    label="Download Program Code Reference File",
     data=file_bytes,
     file_name="reference_file.csv",
     mime="text/csv"
