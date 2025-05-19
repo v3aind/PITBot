@@ -44,6 +44,13 @@ def process_files(file1, file2, progress_bar):
     df1['AREA_GROUP'] = df1['AREA_GROUP'].str.strip().str.lower()
     df2['AREA_GROUP'] = df2['AREA_GROUP'].str.strip().str.lower()
 
+    # Merge the two DataFrames based on AREA_GROUP
+    merged_df = pd.merge(df2, df1, on="AREA_GROUP", how="left")
+    progress_bar.progress(70)
+    
+    # ✅ Keep only rows where PROGRAM_CODE is available
+    merged_df = merged_df[merged_df["PROGRAM_CODE"].notna()]
+
     # Create a new DataFrame for the output
     output_df = pd.DataFrame(columns=[
         "AREA", "PACKAGE_CODE", "AREA_DESCRIPTION", "AREA_NEW", "SERVICE_CLASS_NEW",
