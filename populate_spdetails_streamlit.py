@@ -39,6 +39,10 @@ def process_files(file1, file2, progress_bar):
     progress_bar.progress(30)
     df2 = pd.read_excel(file2)
     progress_bar.progress(50)
+    
+    # Normalize AREA_GROUP for exact match (strip + lowercase)
+    df1['AREA_GROUP'] = df1['AREA_GROUP'].str.strip().str.lower()
+    df2['AREA_GROUP'] = df2['AREA_GROUP'].str.strip().str.lower()
 
     # Create a new DataFrame for the output
     output_df = pd.DataFrame(columns=[
