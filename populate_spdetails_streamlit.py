@@ -48,8 +48,8 @@ def process_files(file1, file2, progress_bar):
     merged_df = pd.merge(df2, df1, on="AREA_GROUP", how="left")
     progress_bar.progress(70)
     
-    # ✅ Keep only rows where PROGRAM_CODE is available
-    merged_df = merged_df[merged_df["PROGRAM_CODE"].notna()]
+    # ✅ Filter only rows where PROGRAM_CODE is available (not NaN or empty)
+    merged_df = merged_df[merged_df["PROGRAM_CODE"].notna() & (merged_df["PROGRAM_CODE"] != "")]
 
     # Create a new DataFrame for the output
     output_df = pd.DataFrame(columns=[
