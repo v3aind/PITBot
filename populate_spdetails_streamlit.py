@@ -2,11 +2,10 @@ import pandas as pd
 import streamlit as st
 from io import BytesIO
 import requests
-
 import threading
 import time
 
-file_url="https://github.com/v3aind/PITBot/blob/main/programcode.xlsx"
+file_url = "https://github.com/v3aind/PITBot/blob/main/programcode.xlsx"
 
 # Fetch the file content
 response = requests.get(file_url)
@@ -39,17 +38,17 @@ def process_files(file1, file2, progress_bar):
     progress_bar.progress(30)
     df2 = pd.read_excel(file2)
     progress_bar.progress(50)
-    
+
     # Normalize AREA_GROUP for exact match (strip + lowercase)
-    df1['AREA_GROUP'] = df1['AREA_GROUP'].str.strip().str.lower()
-    df2['AREA_GROUP'] = df2['AREA_GROUP'].str.strip().str.lower()
+    df1['AREA_GROUP'] = df1['AREA_GROUP'].astype(str).str.strip().str.lower()
+    df2['AREA_GROUP'] = df2['AREA_GROUP'].astype(str).str.strip().str.lower()
 
     # Merge the two DataFrames based on AREA_GROUP
     merged_df = pd.merge(df2, df1, on="AREA_GROUP", how="left")
     progress_bar.progress(70)
-    
-    # ✅ Filter only rows where PROGRAM_CODE is available (not NaN or empty)
-    merged_df = merged_df[merged_df["PROGRAM_CODE"].notna() & (merged_df["PROGRAM_CODE"] != "")]
+
+    # Filter only rows where PROGRAM_CODE is available (not NaN or empty string)
+    merged_df = merged_df[merged_df["PROGRAM_CODE"].notna() & (merged_df["PROGRAM_CODE"].astype(str).str.strip() != "")]
 
     # Create a new DataFrame for the output
     output_df = pd.DataFrame(columns=[
@@ -60,11 +59,7 @@ def process_files(file1, file2, progress_bar):
         "SERVICE_CLASS_LEGACY", "FULFILLMENT_MODE"
     ])
 
-    # Merge the two DataFrames based on AREA_GROUP
-    merged_df = pd.merge(df2, df1, on="AREA_GROUP", how="left")
-    progress_bar.progress(70)
-
-    # Populate the output DataFrame from the merged DataFrame
+    # Populate the output DataFrame from the filtered merged DataFrame
     output_df["AREA"] = merged_df["AREACODE"].apply(lambda x: str(x).zfill(3))
     output_df["PACKAGE_CODE"] = merged_df["PROGRAM_CODE"]
     output_df["AREA_DESCRIPTION"] = merged_df["AREA_DESCRIPTION"]
@@ -79,9 +74,9 @@ def process_files(file1, file2, progress_bar):
     output_df["PROMOTION_PLAN_STARTDATE"] = ""
     output_df["PROMOTION_PLAN_ENDDATE"] = ""
 
-    # Set PRODUCT_SEGMENT_OFFER with exception for SC = 8003
+    # Set PRODUCT_SEGMENT_OFFER with exception for SC = 8003, 8095, 8153
     output_df["PRODUCT_SEGMENT_OFFER"] = merged_df.apply(
-    lambda row: 91100310 if row["SC"] in [8003, 8095, 8153] else row["OfferSegment"], axis=1
+        lambda row: 91100310 if row["SC"] in [8003, 8095, 8153] else row["OfferSegment"], axis=1
     )
 
     output_df["PRODUCT_ID"] = "IM3"
