@@ -76,7 +76,7 @@ def process_files(file1, file2, progress_bar):
 
     # Set PRODUCT_SEGMENT_OFFER with exception for SC = 8003, 8095, 8153
     output_df["PRODUCT_SEGMENT_OFFER"] = merged_df.apply(
-        lambda row: 91100310 if row["SC"] in [8003, 8095, 8153] else row["OfferSegment"], axis=1
+        lambda row: 91100310 if row["SC"] in [8003, 8095, 8153, 8154, 8155, 8156] else row["OfferSegment"], axis=1
     )
 
     output_df["PRODUCT_ID"] = "IM3"
@@ -121,3 +121,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
